@@ -12,4 +12,5 @@ The game is a simple online TicTacToe game with 2 player support for both Window
 - Android SDK for Unity
 # Links
 APK- https://drive.google.com/file/d/1KE6NQ4dup4APEumANOEXJivoiq0w7VJl/view?usp=sharing
-LinkedIn Post and Video-
+
+LinkedIn Post and Video- https://www.linkedin.com/posts/adityajain400_unity-multiplayer-csharp-activity-6723157046767734784-66r2
