@@ -1,17 +1,26 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
     public GameObject connectedScreen;
-    public GameObject disconnectedScreen;
 
     public void OnConnectButton()
     {
-        PhotonNetwork.ConnectUsingSettings();
+        if (!PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.ConnectUsingSettings();
+        }
+        else
+        {
+            PhotonNetwork.JoinLobby(TypedLobby.Default);
+        }
+        
+    }
+    public void OnQuitButton()
+    {
+        Application.Quit();
     }
     public override void OnConnectedToMaster()
     {
@@ -21,12 +30,15 @@ public class Launcher : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("In Lobby!");
-        disconnectedScreen.SetActive(false);
         connectedScreen.SetActive(true);
     }
     public override void OnDisconnected(DisconnectCause cause)
     {
         connectedScreen.SetActive(false);
-        disconnectedScreen.SetActive(true);
+    }
+    public void OnBackLobbyButton()
+    {
+        PhotonNetwork.LeaveLobby();
+        connectedScreen.SetActive(false);
     }
 }

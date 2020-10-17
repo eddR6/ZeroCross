@@ -1,8 +1,8 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class BoardLogic : MonoBehaviour
 {
@@ -24,8 +24,14 @@ public class BoardLogic : MonoBehaviour
             {
                 block.GetComponent<Button>().enabled = false;
             }
-            Toast.Instance.Show("Opponent's turn...", 2f, Toast.ToastColor.Blue);
+            StartCoroutine(InitialClientMessage());
         }
+    }
+
+    IEnumerator InitialClientMessage()
+    {
+        yield return new WaitForSeconds(1);
+        Toast.Instance.Show("Opponent's turn...", 0.2f, Toast.ToastColor.Blue);
     }
 
     public void UpdateBoard(int id)
@@ -40,22 +46,126 @@ public class BoardLogic : MonoBehaviour
         }
     } 
     [PunRPC]
-    private void SetBoard(int id,string str)
+    private void SetBoard(int id,string player)
     {
-        if (str=="Master" )
+        if (player=="Master" )
         {
             blocks[id].GetComponentInChildren<Text>().text = "o";
             blockUsed[id] = 1;
         }
-        else if (str == "Client")
+        else if (player == "Client")
         {
             blocks[id].GetComponentInChildren<Text>().text = "x";
             blockUsed[id] = 1;
         }
 
-        ToggleActiveBoard(str);
+        //
+        if (!CheckForWinCondition(player))
+        {
+            ToggleActiveBoard(player);
+        }
     }
 
+    private bool CheckForWinCondition(string player)
+    {
+        string[] str=new string[blocks.Length];
+        int i = 0;
+        foreach(GameObject block in blocks)
+        {
+            str[i] = block.GetComponentInChildren<Text>().text;
+            i++;
+        }
+        //check win condition
+        if(str[0]!="" && str[1]==str[0] && str[2]==str[1])
+        {
+            DisplayWin(player);
+            return true;
+        }
+        else if (str[3] != "" && str[4] == str[3] && str[5] == str[4])
+        {
+            DisplayWin(player);
+            return true;
+        }
+        else if (str[6] != "" && str[7] == str[6] && str[8] == str[7])
+        {
+            DisplayWin(player);
+            return true;
+        }
+        else if (str[0] != "" && str[3] == str[0] && str[6] == str[3])
+        {
+            DisplayWin(player);
+            return true;
+        }
+        else if (str[1] != "" && str[4] == str[1] && str[7] == str[4])
+        {
+            DisplayWin(player);
+            return true;
+        }
+        else if (str[2] != "" && str[5] == str[2] && str[8] == str[5])
+        {
+            DisplayWin(player);
+            return true;
+        }
+        else if (str[0] != "" && str[4] == str[0] && str[8] == str[4])
+        {
+            DisplayWin(player);
+            return true;
+        }
+        else if (str[2] != "" && str[4] == str[2] && str[6] == str[4])
+        {
+            DisplayWin(player);
+            return true;
+        }
+        //TIE CONDITION
+        bool isFull = true;
+        foreach(string s in str)
+        {
+            if (s == "")
+            {
+                isFull = false;
+                break;
+            }
+        }
+        if (isFull)
+        {
+            DisplayTie();
+            return true;
+        }
+        return false;
+    }
+    private void DisplayTie()
+    {
+        Toast.Instance.Show("Its a Tie!", 4f, Toast.ToastColor.Blue);
+        //Resets the Board
+        StartCoroutine(ResetBoard());
+
+    }
+    private void DisplayWin(string player)
+    {
+        if (PhotonNetwork.IsMasterClient && player == "Master")
+        {   
+            Toast.Instance.Show("You win!", 4f, Toast.ToastColor.Green);
+        }
+        else if (PhotonNetwork.IsMasterClient && player == "Client")
+        {
+            Toast.Instance.Show("You lose!", 4f, Toast.ToastColor.Red);
+        }
+        else if (!PhotonNetwork.IsMasterClient && player == "Client")
+        {
+            Toast.Instance.Show("You win!", 4f, Toast.ToastColor.Green);
+        }
+        else if (!PhotonNetwork.IsMasterClient && player == "Master")
+        {
+            Toast.Instance.Show("You lose!", 4f, Toast.ToastColor.Red);
+        }
+        //Resets the Board
+        StartCoroutine(ResetBoard());
+    }
+    IEnumerator ResetBoard()
+    {
+        yield return new WaitForSeconds(3);
+        SceneManager.LoadScene("Level1");
+    }
     private void ToggleActiveBoard(string str)
     {
         if (PhotonNetwork.IsMasterClient && str == "Master")

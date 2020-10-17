@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
@@ -10,6 +8,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
 {
     public InputField createRoom;
     public InputField joinRoom;
+    public GameObject waitingScreen;
+    public GameObject connectedScreen;
     public void OnCreateRoomButton()
     {
         if (createRoom.text != "")
@@ -32,16 +32,20 @@ public class RoomManager : MonoBehaviourPunCallbacks
             Toast.Instance.Show("No room id provided.", 2f, Toast.ToastColor.Red);
         }
     }
+    
     public override void OnCreatedRoom()
     {
         Debug.Log("Room created as: " + createRoom.text);
         Toast.Instance.Show("Room created as: " + createRoom.text, 3f, Toast.ToastColor.Blue);
-        // PhotonNetwork.JoinRoom(createRoom.text);
     }
     public override void OnJoinedRoom()
     {
         Debug.Log("in joined room!");
         Toast.Instance.Show("Room Joined!", 2f, Toast.ToastColor.Blue);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            waitingScreen.SetActive(true);
+        }
         //FOR CLIENT TO LOAD THE LEVEL
         if (PhotonNetwork.PlayerList.Length== 2)
         {
@@ -54,7 +58,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         Debug.Log(message);
         Toast.Instance.Show("Room already exists... " + createRoom.text, 2f, Toast.ToastColor.Red);
-        //((Text)(createRoom.placeholder)).text = "Room already exists...";
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
@@ -66,5 +69,10 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         Toast.Instance.Show("New Player entered", 2f, Toast.ToastColor.Green);
         SceneManager.LoadScene("Level1");
+    }
+    public void OnCancelRoomButton()
+    {
+        PhotonNetwork.LeaveRoom();
+        waitingScreen.SetActive(false);
     }
 }
