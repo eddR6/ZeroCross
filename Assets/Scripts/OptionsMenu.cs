@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-using Photon.Pun;
-using Photon.Realtime;
 
-public class OptionsMenu : MonoBehaviourPunCallbacks
+public class OptionsMenu : MonoBehaviour
 {
     public GameObject mainmenu;
+
+    private void Start()
+    {
+    }
+
     public void OnOptionsButton()
     {
         mainmenu.SetActive(true);
@@ -13,19 +16,13 @@ public class OptionsMenu : MonoBehaviourPunCallbacks
     public void OnResumeButton()
     {
         mainmenu.SetActive(false);
+        
+        SaveSystem.SaveGame();
     }
     public void OnMainMenuButton()
     {
-        PhotonNetwork.Disconnect();
         SceneManager.LoadScene("Main");
+    }
 
-    }
-    public override void OnPlayerLeftRoom(Player otherPlayer)
-    {
-        Toast.Instance.Show("Opponent Left the game...", 3f, Toast.ToastColor.Red);
-    }
-    public override void OnDisconnected(DisconnectCause cause)
-    {
-        SceneManager.LoadScene("Main");
-    }
+
 }

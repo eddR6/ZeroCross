@@ -3,11 +3,14 @@ using UnityEngine.UI;
 
 public class BlockLogic : MonoBehaviour
 {
-    public int id;
-    public Button button;
-    public BoardLogic boardLogic;
+    [SerializeField]
+    private int id;
+    private Button button;
+    [SerializeField]
+    private BoardLogic boardLogic;
     private void Start()
     {
+        button = GetComponent<Button>();
         button.onClick.AddListener(UpdateBlock);
     }
     void UpdateBlock()
